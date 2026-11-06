@@ -1,0 +1,17 @@
+﻿# deps / build
+node_modules/
+dist/
+.godot/
+*.tsbuildinfo
+
+# graphify
+graphify-out/
+
+# local env
+.env
+.env.local
+
+# OS / editor
+Thumbs.db
+.DS_Store
+*.log

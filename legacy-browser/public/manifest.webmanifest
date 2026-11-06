@@ -1,0 +1,18 @@
+{
+  "name": "KOTODAMA: Echoes of the Nameless",
+  "short_name": "KOTODAMA",
+  "description": "A cinematic, open-zone 3D action game for the browser. Ten chapters, five weapons, a world that forgot its name.",
+  "start_url": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "background_color": "#0b0a09",
+  "theme_color": "#0b0a09",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 820" font-family="Segoe UI, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#8a7a5f"/>
+    </marker>
+    <style>
+      .box { fill: #171310; stroke: #d9b36a; stroke-width: 1.4; rx: 8; }
+      .box-sub { fill: #14110d; stroke: #7a6a4f; stroke-width: 1; }
+      .label { fill: #e8dcc4; font-size: 14px; font-weight: 600; }
+      .sub { fill: #b9a98c; font-size: 11px; }
+      .edge { stroke: #8a7a5f; stroke-width: 1.4; fill: none; marker-end: url(#arrow); }
+      .edge-dashed { stroke: #6a5a45; stroke-width: 1.2; stroke-dasharray: 5 4; fill: none; marker-end: url(#arrow); }
+      .title { fill: #f0d69a; font-size: 24px; font-weight: 700; letter-spacing: 4px; }
+      .grp { fill: rgba(217,179,106,0.18); stroke: rgba(217,179,106,0.5); stroke-width: 1; stroke-dasharray: 6 5; rx: 14; }
+    </style>
+  </defs>
+
+  <rect x="0" y="0" width="1200" height="820" fill="#0b0a09"/>
+  <text x="40" y="46" class="title">KOTODAMA — SYSTEM DIAGRAM</text>
+  <text x="42" y="68" fill="#b9a98c" font-size="13">The world is data. The engine interprets it. The loop is small.</text>
+
+  <!-- CONTENT (data) -->
+  <rect class="grp" x="34" y="96" width="330" height="470"/>
+  <text x="52" y="122" class="label" fill="#d9b36a">CONTENT · DATA (src/content)</text>
+  <rect class="box" x="52" y="136" width="294" height="42"/><text x="66" y="163" class="label">regions.ts</text><text x="190" y="163" class="sub">6 regions · landmarks · NPCs · spawns</text>
+  <rect class="box" x="52" y="184" width="294" height="42"/><text x="66" y="211" class="label">chapters.ts</text><text x="190" y="211" class="sub">prologue + 10 · boss · cinematics</text>
+  <rect class="box" x="52" y="232" width="294" height="42"/><text x="66" y="259" class="label">enemies.ts</text><text x="190" y="259" class="sub">15 + 6 elites + 10 bosses</text>
+  <rect class="box" x="52" y="280" width="294" height="42"/><text x="66" y="307" class="label">quests.ts</text><text x="190" y="307" class="sub">11 main + 12 side</text>
+  <rect class="box" x="52" y="328" width="294" height="42"/><text x="66" y="355" class="label">dialogue.ts</text><text x="190" y="355" class="sub">19 trees · choices · effects</text>
+  <rect class="box" x="52" y="376" width="294" height="42"/><text x="66" y="403" class="label">weapons.ts</text><text x="190" y="403" class="sub">5 weapons · arts · skills · items</text>
+  <rect class="box" x="52" y="424" width="294" height="42"/><text x="66" y="451" class="label">codex / achievements / endings</text><text x="252" y="451" class="sub">65 · 35 · 4</text>
+  <rect class="box" x="52" y="472" width="294" height="42"/><text x="66" y="499" class="label">cinematics.ts</text><text x="190" y="499" class="sub">timeline cutscenes</text>
+
+  <!-- ENGINE -->
+  <rect class="grp" x="400" y="96" width="470" height="470"/>
+  <text x="418" y="122" class="label" fill="#d9b36a">ENGINE · RUNTIME (src/engine)</text>
+
+  <rect class="box" x="418" y="136" width="200" height="48"/><text x="434" y="159" class="label">Game (orchestrator)</text><text x="434" y="175" class="sub">modes · loop · integration</text>
+  <rect class="box" x="646" y="136" width="206" height="48"/><text x="662" y="159" class="label">Input</text><text x="662" y="175" class="sub">keyboard · mouse · touch</text>
+
+  <rect class="box" x="418" y="210" width="140" height="44"/><text x="434" y="232" class="label">Player</text><text x="434" y="246" class="sub">combat · physics</text>
+  <rect class="box" x="570" y="210" width="140" height="44"/><text x="586" y="232" class="label">Enemy AI</text><text x="586" y="246" class="sub">state machine · bosses</text>
+  <rect class="box" x="722" y="210" width="130" height="44"/><text x="738" y="232" class="label">Effects</text><text x="738" y="246" class="sub">sparks · trails · AoE</text>
+
+  <rect class="box" x="418" y="284" width="140" height="44"/><text x="434" y="306" class="label">World</text><text x="434" y="320" class="sub">landmarks · NPCs</text>
+  <rect class="box" x="570" y="284" width="140" height="44"/><text x="586" y="306" class="label">Terrain</text><text x="586" y="320" class="sub">heights · collision</text>
+  <rect class="box" x="722" y="284" width="130" height="44"/><text x="738" y="306" class="label">Weather</text><text x="738" y="320" class="sub">particles · sky</text>
+
+  <rect class="box" x="418" y="358" width="140" height="44"/><text x="434" y="380" class="label">CameraRig</text><text x="434" y="394" class="sub">orbit · cinematic</text>
+  <rect class="box" x="570" y="358" width="140" height="44"/><text x="586" y="380" class="label">QuestSystem</text><text x="586" y="394" class="sub">state machine</text>
+  <rect class="box" x="722" y="358" width="130" height="44"/><text x="738" y="380" class="label">AudioEngine</text><text x="738" y="394" class="sub">Web Audio synth</text>
+
+  <rect class="box" x="418" y="432" width="140" height="44"/><text x="434" y="454" class="label">SaveSystem</text><text x="434" y="468" class="sub">slots · migration</text>
+  <rect class="box" x="570" y="432" width="140" height="44"/><text x="586" y="454" class="label">Engine</text><text x="586" y="468" class="sub">renderer · shaders</text>
+  <rect class="box" x="722" y="432" width="130" height="44"/><text x="738" y="454" class="label">EventBus</text><text x="738" y="468" class="sub">typed events</text>
+
+  <rect class="box" x="418" y="496" width="434" height="44"/><text x="434" y="518" class="label">Dialogue</text><text x="536" y="518" class="sub">trees · lines · choices · effects</text>
+
+  <!-- UI -->
+  <rect class="grp" x="906" y="96" width="264" height="470"/>
+  <text x="924" y="122" class="label" fill="#d9b36a">UI · DOM (src/ui)</text>
+  <rect class="box" x="924" y="136" width="228" height="48"/><text x="940" y="159" class="label">HUD</text><text x="940" y="175" class="sub">health · posture · boss bar</text>
+  <rect class="box" x="924" y="196" width="228" height="48"/><text x="940" y="219" class="label">Menus</text><text x="940" y="235" class="sub">pause · journal · map · skills · codex</text>
+  <rect class="box" x="924" y="256" width="228" height="48"/><text x="940" y="279" class="label">Dialogue box</text><text x="940" y="295" class="sub">speaker · text · choices</text>
+  <rect class="box" x="924" y="316" width="228" height="48"/><text x="940" y="339" class="label">Overlays</text><text x="940" y="355" class="sub">chapter cards · subtitles · death · ending</text>
+  <rect class="box" x="924" y="376" width="228" height="48"/><text x="940" y="399" class="label">Photo mode</text><text x="940" y="415" class="sub">frame · capture PNG</text>
+  <rect class="box" x="924" y="436" width="228" height="48"/><text x="940" y="459" class="label">Touch controls</text><text x="940" y="475" class="sub">stick · buttons · look drag</text>
+
+  <!-- edges: content -> engine -->
+  <path class="edge" d="M346 157 C 380 157, 382 160, 418 160"/>
+  <path class="edge" d="M346 205 C 382 205, 384 232, 418 232"/>
+  <path class="edge" d="M346 253 C 382 253, 384 280, 418 280"/>
+  <path class="edge" d="M346 301 C 382 301, 384 380, 418 380"/>
+  <path class="edge" d="M346 349 C 382 349, 384 518, 418 518"/>
+  <path class="edge" d="M346 397 C 382 397, 384 286, 418 286"/>
+  <path class="edge" d="M346 445 C 382 445, 384 454, 418 454"/>
+  <path class="edge" d="M346 493 C 382 493, 384 340, 418 340"/>
+
+  <!-- edges: engine -> ui -->
+  <path class="edge" d="M852 160 L 924 160"/>
+  <path class="edge" d="M852 232 L 924 280"/>
+  <path class="edge" d="M852 518 L 924 280"/>
+  <path class="edge-dashed" d="M852 380 L 924 398"/>
+
+  <!-- loop feedback -->
+  <path class="edge-dashed" d="M1140 144 C 1175 144, 1175 600, 700 600 C 500 600, 420 560, 418 520"/>
+  <text x="1010" y="640" class="sub">per-frame loop: input → update → resolve → render</text>
+  <text x="1010" y="658" class="sub">autosave · achievements · events flow upward</text>
+
+  <!-- storage -->
+  <rect class="box" x="418" y="610" width="200" height="46"/><text x="434" y="632" class="label">localStorage</text><text x="434" y="648" class="sub">save slots · settings</text>
+  <path class="edge" d="M538 476 L 538 610"/>
+
+  <!-- footer -->
+  <text x="40" y="760" fill="#8a7a5f" font-size="12">Deterministic world · data-driven content · fully synthesised audio · zero external assets · MIT licensed</text>
+</svg>
