@@ -1,0 +1,46 @@
+name: godot-gates
+
+on:
+  push:
+    paths: ["godot/**", ".github/workflows/godot-gates.yml"]
+  pull_request:
+    paths: ["godot/**", ".github/workflows/godot-gates.yml"]
+
+jobs:
+  gates:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: repo
+
+      - name: Download Godot 4.7.2-stable
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_win64.exe.zip" -OutFile godot.zip
+          Expand-Archive godot.zip -DestinationPath godot -Force
+          Get-ChildItem godot -Recurse -Filter "*.exe" | Select-Object -ExpandProperty FullName
+
+      - name: Import assets
+        shell: pwsh
+        run: ./godot/Godot_v4.7.2-stable_win64.exe --headless --path repo/godot --import
+
+      - name: Gate - load all scripts
+        shell: pwsh
+        run: ./godot/Godot_v4.7.2-stable_win64.exe --headless --path repo/godot --script res://test/check_scripts.gd
+
+      - name: Gate - build main scene
+        shell: pwsh
+        run: ./godot/Godot_v4.7.2-stable_win64.exe --headless --path repo/godot --script res://scenes/build_main.gd
+
+      - name: Gate - scene script integrity
+        shell: pwsh
+        run: ./godot/Godot_v4.7.2-stable_win64.exe --headless --path repo/godot --script res://test/verify_scene.gd
+
+      - name: Gate - runtime smoke v2
+        shell: pwsh
+        run: ./godot/Godot_v4.7.2-stable_win64.exe --headless --path repo/godot --script res://test/smoke_scene.gd
+
+      - name: Gate - headless boot
+        shell: pwsh
+        run: ./godot/Godot_v4.7.2-stable_win64.exe --headless --path repo/godot --quit-after 60
