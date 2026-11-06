@@ -1,0 +1,830 @@
+<roblox version="4">
+  <Item class="Lighting" referent="0">
+    <Properties>
+      <string name="Name">Lighting</string>
+      <Color3 name="Ambient">
+        <R>0.22</R>
+        <G>0.19</G>
+        <B>0.16</B>
+      </Color3>
+      <float name="Brightness">2.4</float>
+      <float name="ClockTime">18.42</float>
+      <Color3 name="FogColor">
+        <R>0.85</R>
+        <G>0.62</G>
+        <B>0.4</B>
+      </Color3>
+      <float name="FogEnd">420</float>
+      <Color3 name="OutdoorAmbient">
+        <R>0.5</R>
+        <G>0.38</G>
+        <B>0.24</B>
+      </Color3>
+      <string name="TimeOfDay">18:25:00</string>
+    </Properties>
+  </Item>
+  <Item class="ReplicatedStorage" referent="1">
+    <Properties>
+      <string name="Name">ReplicatedStorage</string>
+    </Properties>
+    <Item class="Folder" referent="2">
+      <Properties>
+        <string name="Name">Kotodama</string>
+      </Properties>
+      <Item class="ModuleScript" referent="3">
+        <Properties>
+          <string name="Name">CombatConfig</string>
+          <string name="Source"><![CDATA[--!strict
+-- CombatConfig: single source of truth for all tuned values (data-driven).
+
+local CombatConfig = {
+	ComboDamage = { 26, 30, 42 },
+	PostureDamagePerHit = { 10, 12, 22 },
+	RiposteDamage = 60,
+	DashAttackDamage = 32,
+	ComboWindow = 0.8,
+	AttackBuffer = 0.18,
+	AttackCooldown = { 0.35, 0.35, 0.6 },
+	HitRange = 2.1,
+	Enemy = {
+		MaxHp = 70,
+		MaxPosture = 60,
+		DetectRange = 16,
+		AttackRange = 2.4,
+		Damage = 12,
+		TelegraphTime = 0.45,
+		PostureBreakTime = 2.2,
+		ChaseSpeed = 8,
+		LungeSpeed = 18,
+	},
+	Boss = {
+		MaxHp = 420,
+		MaxPosture = 140,
+		DetectRange = 22,
+		AttackRange = 3.2,
+		Damage = 20,
+		Phase2HpRatio = 0.5,
+		TelegraphTime = 0.55,
+		ChaseSpeed = 6.5,
+		Phase2ChaseSpeed = 8.5,
+		LungeSpeed = 26,
+	},
+	Dodge = {
+		Duration = 0.28,
+		Speed = 26,
+		IFrameWindow = 0.36,
+	},
+	Parry = {
+		PerfectWindow = 0.18,
+	},
+	World = {
+		GroundSize = Vector3.new(420, 4, 420),
+		WaterY = 1.2,
+	},
+	Palette = {
+		WarmSand = Color3.fromRGB(224, 186, 122),
+		DeepWarm = Color3.fromRGB(82, 64, 45),
+		ToriiRed = Color3.fromRGB(168, 59, 43),
+		LanternGlow = Color3.fromRGB(255, 178, 89),
+		GoldTelegraph = Color3.fromRGB(255, 191, 64),
+		RedTelegraph = Color3.fromRGB(255, 51, 26),
+		WaterDeep = Color3.fromRGB(31, 77, 97),
+		Foam = Color3.fromRGB(217, 230, 235),
+		BossRobe = Color3.fromRGB(31, 51, 71),
+		GruntRobe = Color3.fromRGB(71, 31, 26),
+		PlayerRobe = Color3.fromRGB(41, 33, 26),
+	},
+}
+
+return CombatConfig
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="4">
+        <Properties>
+          <string name="Name">Events</string>
+          <string name="Source"><![CDATA[--!strict
+-- Events: single registry for all cross-client/server events.
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local EventsFolder = ReplicatedStorage:FindFirstChild("KotodamaEvents")
+if not EventsFolder then
+	EventsFolder = Instance.new("Folder")
+	EventsFolder.Name = "KotodamaEvents"
+	EventsFolder.Parent = ReplicatedStorage
+end
+
+local function ensure(name: string, className: string): Instance
+	local existing = EventsFolder:FindFirstChild(name)
+	if existing then
+		return existing
+	end
+	local inst = Instance.new(className)
+	inst.Name = name
+	inst.Parent = EventsFolder
+	return inst
+end
+
+local Events = {
+	MeleeConnect = ensure("MeleeConnect", "RemoteEvent"),
+	TakeDamage = ensure("TakeDamage", "RemoteEvent"),
+	Objective = ensure("Objective", "RemoteEvent"),
+	BossBar = ensure("BossBar", "RemoteEvent"),
+	BossSlain = ensure("BossSlain", "RemoteEvent"),
+	Callout = ensure("Callout", "RemoteEvent"),
+	PlayerPosture = ensure("PlayerPosture", "RemoteEvent"),
+	PlayerDamaged = ensure("PlayerDamaged", "RemoteEvent"),
+	RiposteReady = ensure("RiposteReady", "RemoteEvent"),
+}
+
+return Events
+]]></string>
+        </Properties>
+      </Item>
+    </Item>
+  </Item>
+  <Item class="ServerScriptService" referent="5">
+    <Properties>
+      <string name="Name">ServerScriptService</string>
+    </Properties>
+    <Item class="Folder" referent="6">
+      <Properties>
+        <string name="Name">KotodamaServer</string>
+      </Properties>
+      <Item class="ModuleScript" referent="7">
+        <Properties>
+          <string name="Name">Bootstrap</string>
+          <string name="Source"><![CDATA[--!strict
+-- Bootstrap: single server entry point. Everything else is required from
+-- here so the world, enemies, boss and combat resolve in one pass.
+
+local EnemyDirector = require(script.Parent.EnemyDirector)
+return EnemyDirector
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="8">
+        <Properties>
+          <string name="Name">CombatServer</string>
+          <string name="Source"><![CDATA[--!strict
+-- CombatServer: resolves melee hits and damage to players/enemies.
+-- Mirrors the Godot port's rules: posture break -> stagger window; dodge
+-- i-frames negate; perfect parry (first 0.18s of stance) negates + builds
+-- posture; gold = blockable, red = unblockable.
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CombatConfig = require(ReplicatedStorage.Kotodama.CombatConfig)
+local Events = require(ReplicatedStorage.Kotodama.Events)
+local P = CombatConfig.Palette
+
+local function findNearestPlayer(pos: Vector3): (Model?, number)
+	local best: Model?
+	local bestDist = math.huge
+	for _, p in ipairs(game:GetService("Players"):GetPlayers()) do
+		local char = p.Character
+		if char then
+			local hrp = char:FindFirstChild("HumanoidRootPart")
+			if hrp then
+				local d = (hrp.Position - pos).Magnitude
+				if d < bestDist then
+					bestDist = d
+					best = char
+				end
+			end
+		end
+	end
+	return best, bestDist
+end
+
+local function isDodging(char: Model): boolean
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	return hrp ~= nil and (hrp:GetAttribute("DodgingUntil") or 0) > os.clock()
+end
+
+local function isParrying(char: Model): boolean
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	if not hrp then
+		return false
+	end
+	local untilT = hrp:GetAttribute("ParryingUntil") or 0
+	local startT = hrp:GetAttribute("ParryStarted") or 0
+	return untilT > os.clock() and (os.clock() - startT) <= CombatConfig.Parry.PerfectWindow
+end
+
+local function damagePlayer(char: Model, amount: number, blockable: boolean)
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	if not hrp or isDodging(char) then
+		return
+	end
+	if blockable and isParrying(char) then
+		Events.RiposteReady:FireClient(game:GetService("Players"):GetPlayerFromCharacter(char))
+		return
+	end
+	local humanoid = char:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		humanoid:TakeDamage(amount)
+	end
+	Events.PlayerDamaged:FireClient(game:GetService("Players"):GetPlayerFromCharacter(char), amount)
+end
+
+local function dealMelee(origin: Vector3, damage: number, postureDmg: number, isHeavy: boolean)
+	for _, enemy in ipairs(workspace:GetChildren()) do
+		if enemy:IsA("Model") and enemy:FindFirstChild("Heart") then
+			local heart = enemy:FindFirstChild("Heart")
+			if (heart.Position - origin).Magnitude <= CombatConfig.HitRange then
+				local hp = enemy:FindFirstChild("HP")
+				local posture = enemy:FindFirstChild("Posture")
+				if hp and posture and hp.Value > 0 then
+					hp.Value -= damage
+					posture.Value = math.max(posture.Value - postureDmg, 0)
+					if posture.Value <= 0 then
+						posture.Value = if enemy:FindFirstChild("Role") and enemy.Role.Value == "boss" then CombatConfig.Boss.MaxPosture else CombatConfig.Enemy.MaxPosture
+						enemy:FindFirstChild("State").Value = "stagger"
+						task.delay(if enemy.Role.Value == "boss" then 2.2 else CombatConfig.Enemy.PostureBreakTime, function()
+							if enemy.Parent then
+								enemy.State.Value = "idle"
+							end
+						end)
+					end
+					if hp.Value <= 0 then
+						enemy:Destroy()
+						if enemy:FindFirstChild("Role") and enemy.Role.Value == "boss" then
+							Events.BossSlain:FireAllClients()
+							Events.Objective:FireAllClients("The Drowned General is slain. The shore can breathe.")
+						end
+						return
+					end
+				end
+			end
+		end
+	end
+end
+
+Events.MeleeConnect.OnServerEvent:Connect(function(player, stage)
+	local char = player.Character
+	if not char then
+		return
+	end
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	if not hrp then
+		return
+	end
+	local stageN = if type(stage) == "number" then stage else 0
+	local dmg = CombatConfig.ComboDamage[stageN + 1] or CombatConfig.ComboDamage[1]
+	local postureDmg = CombatConfig.PostureDamagePerHit[stageN + 1] or 10
+	local origin = hrp.Position + hrp.CFrame.LookVector * 2.4
+	dealMelee(origin, dmg, postureDmg, stageN == 2)
+end)
+
+return {
+	dealMelee = dealMelee,
+	damagePlayer = damagePlayer,
+	isDodging = isDodging,
+	isParrying = isParrying,
+	findNearestPlayer = findNearestPlayer,
+}
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="9">
+        <Properties>
+          <string name="Name">EnemyChar</string>
+          <string name="Source"><![CDATA[--!strict
+-- EnemyChar: builds a cheap, readable enemy model from parts (no external
+-- assets). One "heart" part drives logic; visual parts are welded on.
+
+local CombatConfig = require(script.Parent.CombatConfig)
+
+local EnemyChar = {}
+
+local function newPart(color: Color3, size: Vector3, pos: Vector3, parent: Instance): BasePart
+	local part = Instance.new("Part")
+	part.Shape = Enum.PartType.Block
+	part.Size = size
+	part.Position = pos
+	part.Anchored = false
+	part.CanCollide = false
+	part.Color = color
+	part.Material = Enum.Material.SmoothPlastic
+	part.Parent = parent
+	return part
+end
+
+function EnemyChar.create(role: string, spawnPos: Vector3): Model
+	local model = Instance.new("Model")
+	model.Name = role == "boss" and "DrownedGeneral" or "Grunt"
+	model.Parent = workspace
+
+	local heart = Instance.new("Part")
+	heart.Name = "Heart"
+	heart.Size = Vector3.new(2, 2, 2)
+	heart.Position = spawnPos + Vector3.new(0, 3, 0)
+	heart.Transparency = 1
+	heart.CanCollide = false
+	heart.Anchored = false
+	heart.Parent = model
+
+	local robeColor = role == "boss" and CombatConfig.Palette.BossRobe or CombatConfig.Palette.GruntRobe
+	local torso = newPart(robeColor, Vector3.new(1.6, 3, 1.1), spawnPos + Vector3.new(0, 3.5, 0), model)
+	torso.Name = "Torso"
+
+	local head
+	if role == "boss" then
+		head = newPart(CombatConfig.Palette.WarmSand, Vector3.new(1.1, 1.1, 1.1), spawnPos + Vector3.new(0, 5.4, 0), model)
+		head.Name = "Head"
+	else
+		head = newPart(CombatConfig.Palette.DeepWarm, Vector3.new(0.9, 0.9, 0.9), spawnPos + Vector3.new(0, 5.1, 0), model)
+		head.Name = "Head"
+	end
+
+	local hp = Instance.new("IntValue")
+	hp.Name = "HP"
+	hp.Value = if role == "boss" then CombatConfig.Boss.MaxHp else CombatConfig.Enemy.MaxHp
+	hp.Parent = model
+
+	local posture = Instance.new("IntValue")
+	posture.Name = "Posture"
+	posture.Value = if role == "boss" then CombatConfig.Boss.MaxPosture else CombatConfig.Enemy.MaxPosture
+	posture.Parent = model
+
+	local phase = Instance.new("IntValue")
+	phase.Name = "Phase"
+	phase.Value = 1
+	phase.Parent = model
+
+	local state = Instance.new("StringValue")
+	state.Name = "State"
+	state.Value = "idle"
+	state.Parent = model
+
+	local roleVal = Instance.new("StringValue")
+	roleVal.Name = "Role"
+	roleVal.Value = role
+	roleVal.Parent = model
+
+	return model
+end
+
+return EnemyChar
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="10">
+        <Properties>
+          <string name="Name">EnemyDirector</string>
+          <string name="Source"><![CDATA[--!strict
+-- EnemyDirector: spawns grunts + The Drowned General and runs their AI.
+-- Telegraph flash = head turns gold (sweep/blockable) or red (thrust/
+-- unblockable). Boss has two phases at 50% HP.
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CombatConfig = require(ReplicatedStorage.Kotodama.CombatConfig)
+local Events = require(ReplicatedStorage.Kotodama.Events)
+local CombatServer = require(script.Parent.CombatServer)
+local EnemyChar = require(script.Parent.EnemyChar)
+
+local P = CombatConfig.Palette
+
+local function setTelegraph(model: Model, red: boolean)
+	local head = model:FindFirstChild("Head")
+	if head then
+		head.Color = if red then P.RedTelegraph else P.GoldTelegraph
+		head.Material = Enum.Material.Neon
+	end
+end
+
+local function clearTelegraph(model: Model)
+	local head = model:FindFirstChild("Head")
+	if head then
+		head.Color = if model:FindFirstChild("Role") and model.Role.Value == "boss" then P.WarmSand else P.DeepWarm
+		head.Material = Enum.Material.SmoothPlastic
+	end
+end
+
+local function runEnemy(model: Model, isBoss: boolean)
+	local heart = model:FindFirstChild("Heart")
+	local hp = model:FindFirstChild("HP")
+	while model.Parent and hp and hp.Value > 0 do
+		local player, dist = CombatServer.findNearestPlayer(heart.Position)
+		local state = model:FindFirstChild("State")
+		if state and player then
+			if state.Value == "stagger" then
+				task.wait(0.1)
+			elseif dist > (if isBoss then CombatConfig.Boss.DetectRange else CombatConfig.Enemy.DetectRange) then
+				if state.Value ~= "idle" then
+					state.Value = "idle"
+					clearTelegraph(model)
+				end
+				task.wait(0.2)
+			else
+				local attackRange = if isBoss then CombatConfig.Boss.AttackRange else CombatConfig.Enemy.AttackRange
+				if dist > attackRange then
+					state.Value = "chase"
+					heart.AssemblyLinearVelocity = (player.HumanoidRootPart.Position - heart.Position).Unit * (if isBoss and model.Phase.Value == 2 then CombatConfig.Boss.Phase2ChaseSpeed else if isBoss then CombatConfig.Boss.ChaseSpeed else CombatConfig.Enemy.ChaseSpeed)
+				else
+					-- Telegraph then lunge (gold sweep / red thrust).
+					local red = isBoss and model.Phase.Value == 2 and math.random() < 0.35
+					setTelegraph(model, red)
+					state.Value = "telegraph"
+					task.wait(if isBoss then CombatConfig.Boss.TelegraphTime else CombatConfig.Enemy.TelegraphTime)
+					if model.Parent then
+						heart.AssemblyLinearVelocity = (player.HumanoidRootPart.Position - heart.Position).Unit * (if isBoss then CombatConfig.Boss.LungeSpeed else CombatConfig.Enemy.LungeSpeed)
+						state.Value = "lunge"
+						task.wait(0.35)
+						heart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+						if (player.HumanoidRootPart.Position - heart.Position).Magnitude < attackRange + 1.2 then
+							CombatServer.damagePlayer(player, if isBoss then CombatConfig.Boss.Damage else CombatConfig.Enemy.Damage, not red)
+						end
+						clearTelegraph(model)
+						state.Value = "recover"
+						task.wait(0.8)
+						state.Value = "idle"
+					end
+				end
+			end
+		else
+			task.wait(0.25)
+		end
+	end
+end
+
+local function spawnGrunts()
+	for i = 0, 1 do
+		local model = EnemyChar.create("grunt", Vector3.new(-8 + i * 16, 1, 34))
+		task.spawn(runEnemy, model, false)
+	end
+end
+
+local function spawnBoss()
+	local model = EnemyChar.create("boss", Vector3.new(0, 2, -130))
+	local hp = model:FindFirstChild("HP")
+	local phase = model:FindFirstChild("Phase")
+	Events.Objective:FireAllClients("Reach the Drowned General at the cliff and break his posture.")
+	Events.BossBar:FireAllClients(hp.Value, hp.Value)
+	task.spawn(function()
+		while model.Parent and hp and hp.Value > 0 do
+			if hp.Value <= CombatConfig.Boss.MaxHp * CombatConfig.Boss.Phase2HpRatio and phase.Value == 1 then
+				phase.Value = 2
+				Events.Callout:FireAllClients("The Drowned General awakens — red thrusts are unblockable.")
+			end
+			Events.BossBar:FireAllClients(hp.Value, CombatConfig.Boss.MaxHp)
+			task.wait(0.5)
+		end
+	end)
+	task.spawn(runEnemy, model, true)
+end
+
+WorldBuilder = require(script.Parent.WorldBuilder)
+WorldBuilder.build()
+spawnGrunts()
+spawnBoss()
+Events.Objective:FireAllClients("The Shore of Broken Words. Find Ame at the torii.")
+]]></string>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="11">
+        <Properties>
+          <string name="Name">WorldBuilder</string>
+          <string name="Source"><![CDATA[--!strict
+-- WorldBuilder: builds the Shore of Broken Words entirely from parts at
+-- runtime (mirrors the Godot port's builder pattern). Low-cost visuals:
+-- neon-free, one PointLight per lantern, water + foam as translucent parts.
+
+local CombatConfig = require(game.ReplicatedStorage.Kotodama.CombatConfig)
+local P = CombatConfig.Palette
+
+local function part(name: string, color: Color3, size: Vector3, pos: Vector3, transparency: number, parent: Instance): BasePart
+	local p = Instance.new("Part")
+	p.Name = name
+	p.Shape = Enum.PartType.Block
+	p.Size = size
+	p.Position = pos
+	p.Anchored = true
+	p.CanCollide = false
+	p.Color = color
+	p.Material = Enum.Material.SmoothPlastic
+	p.Transparency = transparency
+	p.Parent = parent
+	return p
+end
+
+local function torii(cx: number, cz: number, parent: Instance)
+	local g = Instance.new("Folder")
+	g.Name = "Torii"
+	g.Parent = parent
+	for _, side in { -2, 2 } do
+		part("Pillar", P.ToriiRed, Vector3.new(0.7, 8, 0.7), Vector3.new(cx + side, 4, cz), 0, g)
+	end
+	part("Beam", P.ToriiRed, Vector3.new(5.6, 1, 1), Vector3.new(cx, 8.2, cz), 0, g)
+	part("Plaque", P.DeepWarm, Vector3.new(1.6, 0.7, 0.3), Vector3.new(cx, 7.4, cz), 0, g)
+end
+
+local function lantern(cx: number, cz: number, parent: Instance)
+	local pole = part("Pole", P.DeepWarm, Vector3.new(0.25, 3, 0.25), Vector3.new(cx, 1.5, cz), 0, parent)
+	local glow = part("Glow", P.LanternGlow, Vector3.new(0.7, 0.7, 0.7), Vector3.new(cx, 3.2, cz), 0.25, parent)
+	local light = Instance.new("PointLight")
+	light.Color = P.LanternGlow
+	light.Brightness = 2
+	light.Range = 14
+	light.Parent = glow
+end
+
+function WorldBuilder.build()
+	local ws = workspace
+
+	-- Ground
+	part("Ground", P.WarmSand, CombatConfig.World.GroundSize, Vector3.new(0, 0, 0), 0, ws)
+	-- Water (deep, ahead of spawn)
+	part("Water", P.WaterDeep, Vector3.new(360, 1, 260), Vector3.new(0, CombatConfig.World.WaterY, -120), 0.35, ws)
+	-- Shoreline foam between land and water
+	part("Foam", P.Foam, Vector3.new(360, 0.6, 18), Vector3.new(0, CombatConfig.World.WaterY + 0.4, -28), 0.6, ws)
+	-- Torii + lanterns
+	torii(0, 45, ws)
+	lantern(6, 50, ws)
+	lantern(-6, 50, ws)
+	torii(-70, -70, ws)
+	lantern(-60, -80, ws)
+end
+
+return WorldBuilder
+]]></string>
+        </Properties>
+      </Item>
+    </Item>
+  </Item>
+  <Item class="StarterGui" referent="12">
+    <Properties>
+      <string name="Name">StarterGui</string>
+    </Properties>
+    <Item class="Folder" referent="13">
+      <Properties>
+        <string name="Name">KotodamaHUD</string>
+      </Properties>
+      <Item class="ModuleScript" referent="14">
+        <Properties>
+          <string name="Name">HUDClient</string>
+          <string name="Source"><![CDATA[--!strict
+-- HUDClient: builds the game HUD programmatically (health/posture bars,
+-- boss bar, objective line, callouts) and reacts to replicated events.
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Events = require(ReplicatedStorage.Kotodama.Events)
+local player = Players.LocalPlayer
+
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "KotodamaHUD"
+screenGui.ResetOnSpawn = false
+screenGui.Parent = player:WaitForChild("PlayerGui")
+
+local function makeLabel(parent: Instance, name: string, pos: UDim2, size: UDim2, text: string, sizeScale: number, color: Color3): TextLabel
+	local label = Instance.new("TextLabel")
+	label.Name = name
+	label.Position = pos
+	label.Size = size
+	label.BackgroundTransparency = 1
+	label.Text = text
+	label.TextColor3 = color
+	label.TextSize = sizeScale
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.Parent = parent
+	return label
+end
+
+local function makeBar(parent: Instance, name: string, pos: UDim2, size: UDim2, bg: Color3, fg: Color3): (Frame, Frame)
+	local frame = Instance.new("Frame")
+	frame.Name = name
+	frame.Position = pos
+	frame.Size = size
+	frame.BackgroundColor3 = bg
+	frame.BackgroundTransparency = 0.35
+	frame.BorderSizePixel = 0
+	frame.Parent = parent
+	local fill = Instance.new("Frame")
+	fill.Name = "Fill"
+	fill.Size = UDim2.fromScale(1, 1)
+	fill.BackgroundColor3 = fg
+	fill.BorderSizePixel = 0
+	fill.Parent = frame
+	return frame, fill
+end
+
+local healthFrame, healthFill = makeBar(screenGui, "HealthBar", UDim2.new(0, 24, 0, 24), UDim2.new(0, 340, 0, 20), Color3.fromRGB(30, 26, 20), Color3.fromRGB(200, 70, 52))
+local postureFrame, postureFill = makeBar(screenGui, "PostureBar", UDim2.new(0, 24, 0, 50), UDim2.new(0, 340, 0, 14), Color3.fromRGB(30, 26, 20), Color3.fromRGB(240, 205, 128))
+local bossFrame, bossFill = makeBar(screenGui, "BossBar", UDim2.new(0.5, -170, 0, 24), UDim2.new(0, 340, 0, 16), Color3.fromRGB(30, 26, 20), Color3.fromRGB(220, 130, 70))
+bossFrame.Visible = false
+local objective = makeLabel(screenGui, "Objective", UDim2.new(0, 24, 1, -64), UDim2.new(0, 560, 0, 40), "The Shore of Broken Words.", 17, Color3.fromRGB(240, 228, 200))
+local callout = makeLabel(screenGui, "Callout", UDim2.new(0.5, -200, 0, 80), UDim2.new(0, 400, 0, 40), "", 19, Color3.fromRGB(255, 230, 165))
+callout.TextXAlignment = Enum.TextXAlignment.Center
+callout.Visible = false
+
+local function updateHealth()
+	local char = player.Character
+	if not char then
+		return
+	end
+	local humanoid = char:FindFirstChildOfClass("Humanoid")
+	if humanoid then
+		healthFill.Size = UDim2.fromScale(math.clamp(humanoid.Health / humanoid.MaxHealth, 0, 1), 1)
+	end
+end
+
+local function updatePosture()
+	local char = player.Character
+	if not char then
+		return
+	end
+	local hrp = char:FindFirstChild("HumanoidRootPart")
+	if hrp then
+		local drain = hrp:GetAttribute("Posture") or 100
+		postureFill.Size = UDim2.fromScale(math.clamp(drain / 100, 0, 1), 1)
+	end
+end
+
+local function shake(duration: number, magnitude: number)
+	local cam = workspace.CurrentCamera
+	if not cam then
+		return
+	end
+	local base = cam.CFrame
+	local t = 0
+	while t < duration do
+		t += task.wait()
+		cam.CFrame = base * CFrame.new((math.random() - 0.5) * magnitude, (math.random() - 0.5) * magnitude, 0)
+	end
+	cam.CFrame = base
+end
+
+Events.Objective.OnClientEvent:Connect(function(text)
+	objective.Text = text
+end)
+
+Events.BossBar.OnClientEvent:Connect(function(current, maximum)
+	bossFrame.Visible = true
+	bossFill.Size = UDim2.fromScale(math.clamp(current / maximum, 0, 1), 1)
+end)
+
+Events.BossSlain.OnClientEvent:Connect(function()
+	bossFrame.Visible = false
+end)
+
+Events.Callout.OnClientEvent:Connect(function(text)
+	callout.Text = text
+	callout.Visible = true
+	task.delay(2, function()
+		callout.Visible = false
+	end)
+end)
+
+Events.PlayerDamaged.OnClientEvent:Connect(function(_, amount)
+	task.spawn(shake, 0.18, 0.5)
+	callout.Text = string.format("-%d", amount)
+	callout.Visible = true
+	task.delay(0.9, function()
+		callout.Visible = false
+	end)
+end)
+
+Events.RiposteReady.OnClientEvent:Connect(function()
+	callout.Text = "Perfect parry — riposte!"
+	callout.Visible = true
+	task.delay(1.4, function()
+		callout.Visible = false
+	end)
+end)
+
+local function onCharacter(char)
+	char:WaitForChild("Humanoid").HealthChanged:Connect(updateHealth)
+	char:WaitForChild("HumanoidRootPart"):GetAttributeChangedSignal("Posture"):Connect(updatePosture)
+	updateHealth()
+	updatePosture()
+end
+
+if player.Character then
+	onCharacter(player.Character)
+end
+player.CharacterAdded:Connect(onCharacter)
+]]></string>
+        </Properties>
+      </Item>
+    </Item>
+  </Item>
+  <Item class="StarterPlayer" referent="15">
+    <Properties>
+      <string name="Name">StarterPlayer</string>
+    </Properties>
+    <Item class="StarterPlayerScripts" referent="16">
+      <Properties>
+        <string name="Name">StarterPlayerScripts</string>
+      </Properties>
+      <Item class="ModuleScript" referent="17">
+        <Properties>
+          <string name="Name">PlayerController</string>
+          <string name="Source"><![CDATA[--!strict
+-- PlayerController: third-person controller (camera orbit, WASD movement,
+-- sprint, dodge with i-frames, parry stance, buffered melee combos).
+-- Feel mirrors the Godot port: posture-based exchanges, perfect parry.
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CombatConfig = require(ReplicatedStorage.Kotodama.CombatConfig)
+local Events = require(ReplicatedStorage.Kotodama.Events)
+
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+local yaw = 0
+local pitch = 0
+local comboStage = 0
+local lastAttackAt = 0
+local bufferUntil = 0
+local dodgeReadyAt = 0
+
+local function setupCharacter(char: Model)
+	local hrp = char:WaitForChild("HumanoidRootPart")
+	local humanoid = char:WaitForChild("Humanoid")
+
+	-- Input
+	UserInputService.InputBegan:Connect(function(input, processed)
+		if processed then
+			return
+		end
+		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+			local now = os.clock()
+			if now < bufferUntil then
+				return
+			end
+			if now - lastAttackAt > CombatConfig.ComboWindow then
+				comboStage = 0
+			end
+			Events.MeleeConnect:FireServer(comboStage)
+			comboStage = (comboStage + 1) % 3
+			lastAttackAt = now
+			bufferUntil = now + CombatConfig.AttackBuffer
+		elseif input.KeyCode == Enum.KeyCode.Q then
+			hrp:SetAttribute("ParryStarted", os.clock())
+			hrp:SetAttribute("ParryingUntil", os.clock() + 0.12)
+		elseif input.KeyCode == Enum.KeyCode.Space then
+			local now = os.clock()
+			if now >= dodgeReadyAt then
+				local fwd = hrp.CFrame.LookVector
+				hrp.AssemblyLinearVelocity = Vector3.new(fwd.X, 0, fwd.Z) * CombatConfig.Dodge.Speed
+				hrp:SetAttribute("DodgingUntil", os.clock() + CombatConfig.Dodge.IFrameWindow)
+				dodgeReadyAt = now + 0.55
+			end
+		end
+	end)
+
+	UserInputService.InputEnded:Connect(function(input)
+		if input.KeyCode == Enum.KeyCode.Q then
+			hrp:SetAttribute("ParryingUntil", 0)
+		end
+	end)
+
+	-- Camera orbit
+	RunService.RenderStepped:Connect(function()
+		local mouseDelta = UserInputService:GetMouseDelta()
+		yaw -= mouseDelta.X * 0.0022
+		pitch = math.clamp(pitch - mouseDelta.Y * 0.0022, -0.6, 1.0)
+		local camCF = hrp.CFrame * CFrame.Angles(pitch, yaw, 0) * CFrame.new(0, 3.2, 9)
+		camera.CFrame = CFrame.new(camCF.Position, hrp.Position + Vector3.new(0, 2, 0))
+	end)
+
+	-- Movement (camera-relative)
+	RunService.Heartbeat:Connect(function()
+		local move = Vector3.new(
+			(UserInputService:IsKeyDown(Enum.KeyCode.D) and 1 or 0) - (UserInputService:IsKeyDown(Enum.KeyCode.A) and 1 or 0),
+			0,
+			(UserInputService:IsKeyDown(Enum.KeyCode.S) and 1 or 0) - (UserInputService:IsKeyDown(Enum.KeyCode.W) and 1 or 0)
+		)
+		if move.Magnitude > 0 then
+			move = move.Unit
+			local rel = camera.CFrame:VectorToWorldSpace(move)
+			rel = Vector3.new(rel.X, 0, rel.Z).Unit
+			humanoid.MoveDirection = rel
+		else
+			humanoid.MoveDirection = Vector3.new(0, 0, 0)
+		end
+		local sprint = UserInputService:IsKeyDown(Enum.KeyCode.LeftShift)
+		humanoid.WalkSpeed = if sprint then 26 else 16
+	end)
+end
+
+if player.Character then
+	setupCharacter(player.Character)
+end
+player.CharacterAdded:Connect(setupCharacter)
+]]></string>
+        </Properties>
+      </Item>
+    </Item>
+  </Item>
+  <Item class="Workspace" referent="18">
+    <Properties>
+      <string name="Name">Workspace</string>
+      <float name="Gravity">196.2</float>
+      <bool name="NeedsPivotMigration">false</bool>
+    </Properties>
+  </Item>
+</roblox>

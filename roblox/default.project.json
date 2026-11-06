@@ -1,0 +1,48 @@
+{
+  "name": "Kotodama",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "$className": "ReplicatedStorage",
+      "Kotodama": {
+        "$path": "src/ReplicatedStorage/Kotodama"
+      }
+    },
+    "ServerScriptService": {
+      "$className": "ServerScriptService",
+      "KotodamaServer": {
+        "$path": "src/ServerScriptService"
+      }
+    },
+    "StarterPlayer": {
+      "$className": "StarterPlayer",
+      "StarterPlayerScripts": {
+        "$path": "src/StarterPlayerScripts"
+      }
+    },
+    "StarterGui": {
+      "$className": "StarterGui",
+      "KotodamaHUD": {
+        "$path": "src/StarterGui/KotodamaHUD"
+      }
+    },
+    "Lighting": {
+      "$className": "Lighting",
+      "$properties": {
+        "TimeOfDay": "18:25:00",
+        "Ambient": [0.22, 0.19, 0.16],
+        "OutdoorAmbient": [0.5, 0.38, 0.24],
+        "Brightness": 2.4,
+        "ClockTime": 18.42,
+        "FogEnd": 420,
+        "FogColor": [0.85, 0.62, 0.4]
+      }
+    },
+    "Workspace": {
+      "$className": "Workspace",
+      "$properties": {
+        "Gravity": 196.2
+      }
+    }
+  }
+}
