@@ -11,7 +11,7 @@ if (-not (Test-Path $Godot)) { Write-Error "Godot not found at $Godot" }
 
 $proj = "D:\kotodama_godot"
 
-function Run-Godot([string[]]$argsList, [string]$label) {
+function Run-Godot([string[]]$argsList, [string]$label, [switch]$RequireExit) {
   Write-Host "== $label =="
   $out = & $Godot --headless --path $proj @argsList 2>&1
   $text = ($out | Out-String)
@@ -21,6 +21,10 @@ function Run-Godot([string[]]$argsList, [string]$label) {
   if ($text -match '(?i)SCRIPT ERROR|Parse error|Failed to load (script|resource)|Cannot open file|Invalid call|Attempt to call') {
     Write-Host $text
     throw "$label reported errors"
+  }
+  if ($RequireExit -and $LASTEXITCODE -ne 0) {
+    Write-Host $text
+    throw "$label exited with code $LASTEXITCODE"
   }
   Write-Host "ok"
 }
@@ -33,5 +37,6 @@ foreach ($s in @("Terrain","Player","Enemy","Game","HUD")) {
 }
 Run-Godot @("--quit-after", "30") "5/5 headless smoke"
 Run-Godot @("--script", "res://test/verify_scene.gd") "5.5/5 scene script integrity"
+Run-Godot @("--script", "res://test/smoke_scene.gd") "5.75/5 runtime smoke v3 (exit code)" -RequireExit
 
 Write-Host "ALL GATES PASSED"

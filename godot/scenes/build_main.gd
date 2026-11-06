@@ -172,6 +172,45 @@ func _initialize() -> void:
 	objective_label.add_theme_font_size_override("font_size", 14)
 	control.add_child(objective_label)
 
+	var boss_bar := ProgressBar.new()
+	boss_bar.name = "BossBar"
+	boss_bar.position = Vector2(0.0, 122.0)
+	boss_bar.size = Vector2(360.0, 16.0)
+	boss_bar.max_value = 420.0
+	boss_bar.value = 0.0
+	boss_bar.visible = false
+	control.add_child(boss_bar)
+
+	var boss_label := Label.new()
+	boss_label.name = "BossLabel"
+	boss_label.position = Vector2(0.0, 142.0)
+	boss_label.text = "THE DROWNED GENERAL"
+	boss_label.add_theme_font_size_override("font_size", 13)
+	boss_label.add_theme_color_override("font_color", Color(1.0, 0.55, 0.35))
+	boss_label.visible = false
+	control.add_child(boss_label)
+
+	var lockon_label := Label.new()
+	lockon_label.name = "LockonLabel"
+	lockon_label.text = "◈"
+	lockon_label.add_theme_font_size_override("font_size", 26)
+	lockon_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.5))
+	lockon_label.set_anchors_preset(Control.PRESET_CENTER)
+	lockon_label.position = Vector2(-14.0, -18.0)
+	lockon_label.visible = false
+	control.add_child(lockon_label)
+
+	var callout_label := Label.new()
+	callout_label.name = "CalloutLabel"
+	callout_label.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	callout_label.position = Vector2(-200.0, 60.0)
+	callout_label.size = Vector2(400.0, 40.0)
+	callout_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	callout_label.add_theme_font_size_override("font_size", 18)
+	callout_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.65))
+	callout_label.visible = false
+	control.add_child(callout_label)
+
 	root.add_child(hud)
 
 	# ── Boss (mini-boss: The Drowned General) ────────────────────────────

@@ -1,15 +1,13 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" path="res://scripts/Game.gd" id="1_tipki"]
-[ext_resource type="Script" path="res://scripts/Terrain.gd" id="2_85g3d"]
-[ext_resource type="Script" path="res://scripts/Player.gd" id="3_choun"]
-[ext_resource type="Script" path="res://scripts/Enemy.gd" id="4_ya4ey"]
-[ext_resource type="Script" path="res://scripts/HUD.gd" id="5_eb6dy"]
-[ext_resource type="Script" path="res://scripts/Boss.gd" id="6_trceg"]
-[ext_resource type="Script" path="res://scripts/WorldDressing.gd" id="7_a8y0u"]
-[ext_resource type="Script" path="res://scripts/DialogueUI.gd" id="8_jkv2x"]
+[ext_resource type="Script" path="res://scripts/Game.gd" id="1_tefeu"]
+[ext_resource type="Script" path="res://scripts/Terrain.gd" id="2_o6xl0"]
+[ext_resource type="Script" path="res://scripts/HUD.gd" id="3_tipki"]
+[ext_resource type="Script" path="res://scripts/Boss.gd" id="4_85g3d"]
+[ext_resource type="Script" path="res://scripts/WorldDressing.gd" id="5_choun"]
+[ext_resource type="Script" path="res://scripts/DialogueUI.gd" id="6_ya4ey"]
 
-[sub_resource type="Environment" id="Environment_jbj1t"]
+[sub_resource type="Environment" id="Environment_eb6dy"]
 background_mode = 1
 background_color = Color(0.08, 0.07, 0.05, 1)
 tonemap_mode = 2
@@ -17,124 +15,121 @@ fog_enabled = true
 fog_light_color = Color(0.85, 0.65, 0.4, 1)
 fog_density = 0.012
 
-[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_muem4"]
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_trceg"]
 radius = 0.45
 height = 1.8
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dp3eg"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_a8y0u"]
 albedo_color = Color(0.16, 0.13, 0.1, 1)
 roughness = 0.9
 
-[sub_resource type="BoxMesh" id="BoxMesh_0ld40"]
-material = SubResource("StandardMaterial3D_dp3eg")
+[sub_resource type="BoxMesh" id="BoxMesh_jkv2x"]
+material = SubResource("StandardMaterial3D_a8y0u")
 size = Vector3(0.7, 1.6, 0.5)
 
-[sub_resource type="SphereShape3D" id="SphereShape3D_gqmmt"]
+[sub_resource type="SphereShape3D" id="SphereShape3D_jbj1t"]
 radius = 1.35
 
-[sub_resource type="SphereShape3D" id="SphereShape3D_yc10j"]
+[sub_resource type="SphereShape3D" id="SphereShape3D_muem4"]
 radius = 0.55
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_jscy8"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_dp3eg"]
 albedo_color = Color(0.28, 0.12, 0.1, 1)
 roughness = 0.85
 
-[sub_resource type="BoxMesh" id="BoxMesh_pm3ni"]
-material = SubResource("StandardMaterial3D_jscy8")
+[sub_resource type="BoxMesh" id="BoxMesh_0ld40"]
+material = SubResource("StandardMaterial3D_dp3eg")
 size = Vector3(0.8, 1.7, 0.6)
 
-[sub_resource type="SphereShape3D" id="SphereShape3D_y6deb"]
+[sub_resource type="SphereShape3D" id="SphereShape3D_gqmmt"]
 radius = 0.55
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_og1vs"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_yc10j"]
 albedo_color = Color(0.28, 0.12, 0.1, 1)
 roughness = 0.85
 
-[sub_resource type="BoxMesh" id="BoxMesh_2wyq8"]
-material = SubResource("StandardMaterial3D_og1vs")
+[sub_resource type="BoxMesh" id="BoxMesh_jscy8"]
+material = SubResource("StandardMaterial3D_yc10j")
 size = Vector3(0.8, 1.7, 0.6)
 
-[sub_resource type="SphereShape3D" id="SphereShape3D_vxglm"]
+[sub_resource type="SphereShape3D" id="SphereShape3D_pm3ni"]
 radius = 0.9
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_2f3dj"]
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_y6deb"]
 albedo_color = Color(0.12, 0.2, 0.28, 1)
 roughness = 0.8
 
-[sub_resource type="BoxMesh" id="BoxMesh_yq6so"]
-material = SubResource("StandardMaterial3D_2f3dj")
+[sub_resource type="BoxMesh" id="BoxMesh_og1vs"]
+material = SubResource("StandardMaterial3D_y6deb")
 size = Vector3(1.3, 2.6, 0.9)
 
-[node name="Main" type="Node" unique_id=1256980048]
+[node name="Main" type="Node" unique_id=461840020]
 
-[node name="Game" type="Node" parent="." unique_id=1821451048]
-script = ExtResource("1_tipki")
+[node name="Game" type="Node" parent="." unique_id=804560465]
+script = ExtResource("1_tefeu")
 
-[node name="Terrain" type="Node" parent="." unique_id=1542566402]
-script = ExtResource("2_85g3d")
+[node name="Terrain" type="Node" parent="." unique_id=2012211503]
+script = ExtResource("2_o6xl0")
 
-[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=220680062]
-environment = SubResource("Environment_jbj1t")
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=659205070]
+environment = SubResource("Environment_eb6dy")
 
-[node name="Sun" type="DirectionalLight3D" parent="." unique_id=1865704500]
+[node name="Sun" type="DirectionalLight3D" parent="." unique_id=362767866]
 transform = Transform3D(0.81915206, 0.45198438, -0.35312894, 0, 0.6156615, 0.7880107, 0.57357645, -0.6455006, 0.5043204, 0, 0, 0)
 light_energy = 1.2
 
-[node name="Fill" type="DirectionalLight3D" parent="." unique_id=313116833]
+[node name="Fill" type="DirectionalLight3D" parent="." unique_id=657734913]
 transform = Transform3D(-0.64278764, 0.13302222, 0.7544065, 0, 0.9848077, -0.17364818, -0.76604444, -0.1116189, -0.63302225, 0, 0, 0)
 light_color = Color(0.55, 0.7, 0.95, 1)
 light_energy = 0.35
 
-[node name="Player" type="CharacterBody3D" parent="." unique_id=238075602]
+[node name="Player" type="CharacterBody3D" parent="." unique_id=2028999051]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 40)
-script = ExtResource("3_choun")
 
-[node name="Collision" type="CollisionShape3D" parent="Player" unique_id=816194418]
-shape = SubResource("CapsuleShape3D_muem4")
+[node name="Collision" type="CollisionShape3D" parent="Player" unique_id=459579883]
+shape = SubResource("CapsuleShape3D_trceg")
 
-[node name="BodyMesh" type="MeshInstance3D" parent="Player" unique_id=86685184]
+[node name="BodyMesh" type="MeshInstance3D" parent="Player" unique_id=99089774]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, 0)
-mesh = SubResource("BoxMesh_0ld40")
+mesh = SubResource("BoxMesh_jkv2x")
 
-[node name="SlashArea" type="Area3D" parent="Player" unique_id=722300442]
+[node name="SlashArea" type="Area3D" parent="Player" unique_id=1441858960]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.9, -1.1)
 
-[node name="@CollisionShape3D@2" type="CollisionShape3D" parent="Player/SlashArea" unique_id=836484396]
-shape = SubResource("SphereShape3D_gqmmt")
+[node name="@CollisionShape3D@2" type="CollisionShape3D" parent="Player/SlashArea" unique_id=1678202007]
+shape = SubResource("SphereShape3D_jbj1t")
 
-[node name="CameraPivot" type="Node3D" parent="Player" unique_id=1841129506]
+[node name="CameraPivot" type="Node3D" parent="Player" unique_id=2023607229]
 
-[node name="Camera" type="Camera3D" parent="Player/CameraPivot" unique_id=461378161]
+[node name="Camera" type="Camera3D" parent="Player/CameraPivot" unique_id=272552500]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.8, 4.2)
 current = true
 fov = 66.0
 
-[node name="Enemy0" type="CharacterBody3D" parent="." unique_id=1963508802]
+[node name="Enemy0" type="CharacterBody3D" parent="." unique_id=1640268333]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, 14)
-script = ExtResource("4_ya4ey")
 
-[node name="@CollisionShape3D@3" type="CollisionShape3D" parent="Enemy0" unique_id=924876613]
-shape = SubResource("SphereShape3D_yc10j")
+[node name="@CollisionShape3D@3" type="CollisionShape3D" parent="Enemy0" unique_id=630802074]
+shape = SubResource("SphereShape3D_muem4")
 
-[node name="BodyMesh" type="MeshInstance3D" parent="Enemy0" unique_id=198412213]
+[node name="BodyMesh" type="MeshInstance3D" parent="Enemy0" unique_id=14084886]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
-mesh = SubResource("BoxMesh_pm3ni")
+mesh = SubResource("BoxMesh_0ld40")
 
-[node name="Enemy1" type="CharacterBody3D" parent="." unique_id=737227179]
+[node name="Enemy1" type="CharacterBody3D" parent="." unique_id=1535737781]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 6, 0, 14)
-script = ExtResource("4_ya4ey")
 
-[node name="@CollisionShape3D@4" type="CollisionShape3D" parent="Enemy1" unique_id=1599977773]
-shape = SubResource("SphereShape3D_y6deb")
+[node name="@CollisionShape3D@4" type="CollisionShape3D" parent="Enemy1" unique_id=955873598]
+shape = SubResource("SphereShape3D_gqmmt")
 
-[node name="BodyMesh" type="MeshInstance3D" parent="Enemy1" unique_id=919529400]
+[node name="BodyMesh" type="MeshInstance3D" parent="Enemy1" unique_id=1060238313]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.95, 0)
-mesh = SubResource("BoxMesh_2wyq8")
+mesh = SubResource("BoxMesh_jscy8")
 
-[node name="HUD" type="CanvasLayer" parent="." unique_id=215425852]
-script = ExtResource("5_eb6dy")
+[node name="HUD" type="CanvasLayer" parent="." unique_id=1610472]
+script = ExtResource("3_tipki")
 
-[node name="Control" type="Control" parent="HUD" unique_id=1466515320]
+[node name="Control" type="Control" parent="HUD" unique_id=1489571164]
 layout_mode = 3
 anchors_preset = 0
 offset_left = 24.0
@@ -142,56 +137,101 @@ offset_top = 24.0
 offset_right = 444.0
 offset_bottom = 144.0
 
-[node name="HealthBar" type="ProgressBar" parent="HUD/Control" unique_id=1333700523]
+[node name="HealthBar" type="ProgressBar" parent="HUD/Control" unique_id=777990951]
 layout_mode = 0
 offset_right = 360.0
 offset_bottom = 27.0
 max_value = 120.0
 value = 120.0
 
-[node name="HealthLabel" type="Label" parent="HUD/Control" unique_id=967746644]
+[node name="HealthLabel" type="Label" parent="HUD/Control" unique_id=381447427]
 layout_mode = 0
 offset_top = 26.0
 offset_bottom = 26.0
 text = "VITALITY 120/120"
 
-[node name="PostureBar" type="ProgressBar" parent="HUD/Control" unique_id=199719309]
+[node name="PostureBar" type="ProgressBar" parent="HUD/Control" unique_id=624652613]
 layout_mode = 0
 offset_top = 52.0
 offset_right = 360.0
 offset_bottom = 79.0
 value = 100.0
 
-[node name="PostureLabel" type="Label" parent="HUD/Control" unique_id=1933365023]
+[node name="PostureLabel" type="Label" parent="HUD/Control" unique_id=1098744361]
 layout_mode = 0
 offset_top = 74.0
 offset_bottom = 74.0
 text = "POSTURE 100/100"
 
-[node name="ObjectiveLabel" type="Label" parent="HUD/Control" unique_id=1572082698]
+[node name="ObjectiveLabel" type="Label" parent="HUD/Control" unique_id=1476959313]
 layout_mode = 0
 offset_top = 98.0
 offset_bottom = 98.0
 theme_override_font_sizes/font_size = 14
 
-[node name="Boss" type="CharacterBody3D" parent="." unique_id=1215957169]
+[node name="BossBar" type="ProgressBar" parent="HUD/Control" unique_id=1017518207]
+visible = false
+layout_mode = 0
+offset_top = 122.0
+offset_right = 360.0
+offset_bottom = 149.0
+max_value = 420.0
+
+[node name="BossLabel" type="Label" parent="HUD/Control" unique_id=628520794]
+visible = false
+layout_mode = 0
+offset_top = 142.0
+offset_bottom = 142.0
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(1, 0.55, 0.35, 1)
+text = "THE DROWNED GENERAL"
+
+[node name="LockonLabel" type="Label" parent="HUD/Control" unique_id=876401725]
+visible = false
+layout_mode = 0
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -14.0
+offset_top = -18.0
+offset_right = -14.0
+offset_bottom = -18.0
+theme_override_font_sizes/font_size = 26
+theme_override_colors/font_color = Color(1, 0.85, 0.5, 1)
+text = "◈"
+
+[node name="CalloutLabel" type="Label" parent="HUD/Control" unique_id=665732192]
+visible = false
+layout_mode = 0
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -200.0
+offset_top = 60.0
+offset_right = 200.0
+offset_bottom = 100.0
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(1, 0.9, 0.65, 1)
+horizontal_alignment = 1
+
+[node name="Boss" type="CharacterBody3D" parent="." unique_id=1208489918]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -70)
-script = ExtResource("6_trceg")
+script = ExtResource("4_85g3d")
 
-[node name="@CollisionShape3D@5" type="CollisionShape3D" parent="Boss" unique_id=1523155334]
-shape = SubResource("SphereShape3D_vxglm")
+[node name="@CollisionShape3D@5" type="CollisionShape3D" parent="Boss" unique_id=1053130437]
+shape = SubResource("SphereShape3D_pm3ni")
 
-[node name="BodyMesh" type="MeshInstance3D" parent="Boss" unique_id=389208076]
+[node name="BodyMesh" type="MeshInstance3D" parent="Boss" unique_id=511889644]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.45, 0)
-mesh = SubResource("BoxMesh_yq6so")
+mesh = SubResource("BoxMesh_og1vs")
 
-[node name="WorldDressing" type="Node" parent="." unique_id=850039686]
-script = ExtResource("7_a8y0u")
+[node name="WorldDressing" type="Node" parent="." unique_id=1294887096]
+script = ExtResource("5_choun")
 
-[node name="DialogueUI" type="CanvasLayer" parent="." unique_id=90596080]
-script = ExtResource("8_jkv2x")
+[node name="DialogueUI" type="CanvasLayer" parent="." unique_id=468336337]
+script = ExtResource("6_ya4ey")
 
-[node name="Control" type="Control" parent="DialogueUI" unique_id=1672811127]
+[node name="Control" type="Control" parent="DialogueUI" unique_id=1511340598]
 layout_mode = 3
 anchors_preset = 7
 anchor_left = 0.5
@@ -203,11 +243,11 @@ offset_top = -140.0
 offset_right = 330.0
 offset_bottom = -20.0
 
-[node name="SpeakerLabel" type="Label" parent="DialogueUI/Control" unique_id=1569190488]
+[node name="SpeakerLabel" type="Label" parent="DialogueUI/Control" unique_id=235658086]
 layout_mode = 0
 theme_override_font_sizes/font_size = 16
 
-[node name="TextLabel" type="Label" parent="DialogueUI/Control" unique_id=2042530929]
+[node name="TextLabel" type="Label" parent="DialogueUI/Control" unique_id=1702324635]
 layout_mode = 0
 offset_top = 26.0
 offset_right = 660.0
